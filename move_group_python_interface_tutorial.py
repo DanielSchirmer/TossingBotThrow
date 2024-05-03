@@ -178,7 +178,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.eef_link = eef_link
         self.group_names = group_names
 
-    async def go_to_joint_state(self, j0, j1, j2, j3, j4, j5, j6):
+    def go_to_joint_state(self, j0, j1, j2, j3, j4, j5, j6):
         # Copy class variables to local variables to make the web tutorials more clear.
         # In practice, you should use the class variables directly unless you have a good
         # reason not to.

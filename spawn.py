@@ -75,7 +75,7 @@ if __name__ == '__main__':
         robot.go_to_joint_state(0, -10, 0, -150, 0, 130, 45)
 
         # Öffnen des Greifers neu
-        control_gripper_force_and_width(0.075, 0, 0)
+        control_gripper_force_and_width(0.08, 0, 0)
 
 
         # Alte Winkel
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         # Öffnen des Greifers alt
         #control_gripper(0.08)
 
-        control_gripper_force_and_width(0.075, 0, 0)
+        control_gripper_force_and_width(0.08, 0, 0)
 
 
         # Drehen des Roboters auf Seite oder nach oben
