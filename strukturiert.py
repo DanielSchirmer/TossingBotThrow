@@ -7,8 +7,7 @@ from gazebo_msgs.srv import SetModelState
 from franka_gripper.msg import GraspAction, GraspGoal, MoveGoal, MoveAction
 from move_group_python_interface_tutorial import MoveGroupPythonInterfaceTutorial
 
-# Methode zum Spawnen eines Objekts
-def spawnObject(model_name, pose, reference_frame="world"):
+def spawnObject(model_name, pose):
     rospy.wait_for_service('/gazebo/set_model_state')
     try:
         set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
@@ -17,62 +16,54 @@ def spawnObject(model_name, pose, reference_frame="world"):
         state.pose.position.x = pose[0]
         state.pose.position.y = pose[1]
         state.pose.position.z = pose[2]
-        state.reference_frame = reference_frame
         set_model_state(state)
         rospy.loginfo("Spawned object '{}' successfully.".format(model_name))
     except rospy.ServiceException as e:
         rospy.logerr("Service call failed: {}".format(e))
 
-# Methode zur Steuerung des Greifers mit Kraft und Breite
-def controlGripper(width, force, width_tolerance):
-    # Erstelle den Action-Client
-    if force == 0 and width_tolerance == 0.0:
+def controlGripper(width, force):
+    if force == 0:
+        rospy.loginfo("Opening gripper")
         client = actionlib.SimpleActionClient('/franka_gripper/move', MoveAction)
+        rospy.loginfo("Waiting for the move action server to start...")
         client.wait_for_server()
+        rospy.loginfo("Move action server found.")
         goal = MoveGoal(width=width, speed=1.0)
     else:
+        rospy.loginfo("Closing gripper")
         client = actionlib.SimpleActionClient('/franka_gripper/grasp', GraspAction)
-        rospy.loginfo("Waiting for franka gripper grasp action server...")
+        rospy.loginfo("Waiting for the grasp action server to start...")
         client.wait_for_server()
-        rospy.loginfo("franka gripper grasp action server found.")
-        goal = GraspGoal()
-        goal.width = width
-        goal.speed = 0.5
-        goal.force = force
-        goal.epsilon.inner = width_tolerance
-        goal.epsilon.outer = width_tolerance
+        rospy.loginfo("Grasp action server found.")
+        goal = GraspGoal(width=width, speed=1.0, force=force)
+        goal.epsilon.inner = 0.001
+        goal.epsilon.outer = 0.001
 
-    # Sende das Ziel an den Action-Server
-    rospy.loginfo("Sending goal to franka gripper grasp action server...")
+    rospy.loginfo("Sending goal to action server...")
     client.send_goal(goal)
 
-    # Warte auf das Ergebnis
     client.wait_for_result()
     result = client.get_result()
+    print(result)
     rospy.loginfo("Result: Success - %s", result.success if result else "No result received")
 
-# Methode für die Wurfbewegung
 def throwMovement(robot):
     robot.go_to_joint_state(-166, 50, 0, -4, 0, 170, -20)
 
-# Methode für das Loslassen
 def throwOpen():
-    # Warten bis Loslassen
     sleep(1.4)
-    controlGripper(0.08, 0, 0)
+    controlGripper(0.08, 0)
 
-# Methode zur gleichzeitigen Ausführung
 def throw(robot):
-    thread1 = Thread(target=throwMovement, args=(robot,))
-    thread2 = Thread(target=throwOpen)
+    movement = Thread(target=throwMovement, args=(robot,))
+    open = Thread(target=throwOpen)
 
-    thread1.start()
-    thread2.start()
+    movement.start()
+    open.start()
     
-    thread1.join()
-    thread2.join()
+    movement.join()
+    open.join()
 
-# Hauptfunktion
 def main():
     try:
         # Initialisiere den ROS-Knoten für den Greifer
@@ -83,26 +74,23 @@ def main():
 
         # Bewegungen des Roboters und Steuerung des Greifers
         robot.go_to_joint_state(0, -10, 0, -150, 0, 130, 45)
-        controlGripper(0.08, 0, 0)
+        controlGripper(0.08, 0)
         robot.go_to_joint_state(0, 19, 0, -153, 0, 171, 45)
-        controlGripper(0.06, 10, 0.001)
+        controlGripper(0.06, 10)
 
         # Wurf
         throw(robot)
 
-        # Warten bis spawn
+        # Warten bevor Objekt spawnen soll
         input()
 
         # Spawne Objekt
         model_name = "cube"
-        
-        
         pose = [0.4, 0, 0.4190880]
         spawnObject(model_name, pose)
 
     except rospy.ROSInterruptException:
         pass
 
-# Hauptprogramm starten
 if __name__ == "__main__":
     main()

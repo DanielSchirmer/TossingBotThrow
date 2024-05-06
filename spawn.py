@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
 
         # Joint State mit den Winkeln
-        robot.go_to_joint_state(0, -10, 0, -150, 0, 130, 45)
+        #robot.go_to_joint_state(0, -10, 0, -150, 0, 130, 45)
 
         # Öffnen des Greifers neu
         control_gripper_force_and_width(0.08, 0, 0)
@@ -87,25 +87,25 @@ if __name__ == '__main__':
 
 
         # Schließen des Greifers mit Force
-        control_gripper_force_and_width(0.06, 10, 0.001)
+#        control_gripper_force_and_width(0.06, 10, 0.001)
 
         
         # Bewegen des Roboters nach oben
-        robot.go_to_joint_state(0, -10, 0, -150, 0, 130, 45)
+#        robot.go_to_joint_state(0, -10, 0, -150, 0, 130, 45)
 
 
         # Ausholen
-        robot.go_to_joint_state(0, -100, 0, -175, 0, 90, 45)
+#        robot.go_to_joint_state(0, -100, 0, -175, 0, 90, 45)
 
 
         # Endposition
-        robot.go_to_joint_state(0, 44, 0, -4, 0, 135, 45)
+#        robot.go_to_joint_state(0, 44, 0, -4, 0, 135, 45)
 
 
         # Öffnen des Greifers alt
         #control_gripper(0.08)
 
-        control_gripper_force_and_width(0.08, 0, 0)
+#        control_gripper_force_and_width(0.08, 0, 0)
 
 
         # Drehen des Roboters auf Seite oder nach oben
